@@ -13,6 +13,7 @@ import datetime
 import dateutil.parser
 import unicodedata
 import time
+from decouple import config
 
 
 nltk.download([
@@ -34,8 +35,8 @@ emoticonMap = {}
 sia = SentimentIntensityAnalyzer()
 
 def auth():
-    print('TOKEN:', os.getenv('TOKEN'))
-    return os.getenv('TOKEN')
+    return config('TOKEN')
+    # return os.getenv('TOKEN')
 
 def create_headers(bearer_token):
     headers = {"Authorization": "Bearer {}".format(bearer_token)}
@@ -228,17 +229,17 @@ def runAnalysis(method, searchTerm):
 
 
 emoticonMap = getEmoticonMap()
-# api = Flask(__name__)
+api = Flask(__name__)
 
-# @api.route('/sentAnalysis', methods=['GET'])
-# def get_message():
-#     output = runAnalysis(int(request.args['method']), request.args['searchTerm'])
-#     return str(output)
+@api.route('/sentAnalysis', methods=['GET'])
+def get_message():
+    output = runAnalysis(int(request.args['method']), request.args['searchTerm'])
+    return str(output)
 
-# if __name__ == '__main__':
-#     api.run(debug=True,host='0.0.0.0',port=5000)
+if __name__ == '__main__':
+    api.run(debug=True,host='0.0.0.0',port=5000)
 
-print(runAnalysis(0, "AMC"))
+# print(runAnalysis(0, "AMC"))
 
 # http://127.0.0.1:5000/sentAnalysis?method=0&searchTerm=AAPL
 

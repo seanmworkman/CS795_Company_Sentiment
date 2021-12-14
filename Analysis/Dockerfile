@@ -17,6 +17,7 @@ WORKDIR /usr/src/app
 RUN pip install flask
 RUN pip install nltk
 RUN pip install yfinance
+RUN pip install python-decouple
 
 COPY ./* ./
 

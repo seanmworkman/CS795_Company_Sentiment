@@ -9,7 +9,7 @@
 ## Analysis
     contains all code for sentiment analysis
 
-## To run:
+## To run
 1) In ```./Analysis```:
     a) ```docker build -t masters/sentanalysis:latest .```
     b) ```docker run -p 5000:5000 masters/sentanalysis:latest```
@@ -19,6 +19,9 @@
 3) In ```./graphql-sa-server```:
     a) ```npm i```
     b) ```npm start```
+
+## Issues
+The Twitter API bearer token used is in a file that is not included in this code.
 
 Sentiment Analysis on Twitter Data for Companies
 Sean Workman
