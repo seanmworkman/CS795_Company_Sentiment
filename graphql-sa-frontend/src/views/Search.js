@@ -97,8 +97,12 @@ client = new ApolloClient({
     displayResult = () => {
       let result = parseFloat(this.state.result);
       let polarity = "Neutral";
-      if (result < 0.1) polarity = "Negative";
-      if (result > 0.1) polarity = "Positive";
+      if (result < -0.05 && result > -0.15) polarity = "Slightly Negative";
+      else if (result < 0.15 && result > 0.05) polarity = "Slightly Positive";
+      else if (result === -1.0) polarity = "Very Negative";
+      else if (result === 1.0) polarity = "Very Positive";
+      else if (result < -0.15) polarity = "Negative";
+      else if (result > 0.15) polarity = "Positive";
       return (
         <Card>
             <CardBody>
