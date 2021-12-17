@@ -34,14 +34,16 @@ nltk.download([
 emoticonMap = {}
 sia = SentimentIntensityAnalyzer()
 
+# Retrieve the twitter api bearer token 
 def auth():
     return config('TOKEN')
-    # return os.getenv('TOKEN')
 
+# Create headers for the twitter api connection
 def create_headers(bearer_token):
     headers = {"Authorization": "Bearer {}".format(bearer_token)}
     return headers
 
+# Create the twitter api url with query paramenters
 def create_url(keyword, max_results = 10):
     search_url = "https://api.twitter.com/2/tweets/search/recent"
 
@@ -52,6 +54,7 @@ def create_url(keyword, max_results = 10):
 
     return (search_url, query_params)
 
+# Establish the twitter api connection
 def connect_to_endpoint(url, headers, params, next_token = None):
     params['next_token'] = next_token
     response = requests.request("GET", url, headers = headers, params = params)
@@ -60,6 +63,7 @@ def connect_to_endpoint(url, headers, params, next_token = None):
         raise Exception(response.status_code, response.text)
     return response.json()
 
+# Read emoticon map file and create a dict of emoticons
 def getEmoticonMap():
     f = open('EmoticonMapping.txt')
     emDict = {}
@@ -82,6 +86,7 @@ def preprocessData(data):
     preprocessedData = []
     for i in range(len(data)):
         tweet = data[i]
+        # Standard tweet clean up
         tweet = tweet.replace('.', '')
         tweet = tweet.replace('\n', '')
         tweet = tweet.replace('"', '')
@@ -91,16 +96,21 @@ def preprocessData(data):
         splitTweet = [word for word in splitTweet if not word.lower() in stopwords.words()]
         # Map emoticons
         for k in range(len(splitTweet)):
+            # Remove links and mentions
             if 'http' in splitTweet[k] or '@' in splitTweet[k]:
                 splitTweet[k] = ''
+            # Map 2 common emojis (create emoji dict in future iterations)
             if '🚀' in splitTweet[k]:
                 splitTweet[k] = 'great'
             if '🙏' in splitTweet[k]:
                 splitTweet[k] = 'hopeful'
 
+            # Map any emoticons
             splitTweet[k] = mapEmoticon(splitTweet[k])
 
+        # Rejoin the split tweet to a string
         tweet = ' '.join(splitTweet)
+        # More tweet clean up
         tweet = tweet.replace(';', '')
         tweet = tweet.replace('!', '')
         tweet = tweet.replace(':', '')
@@ -110,6 +120,7 @@ def preprocessData(data):
 
     return preprocessedData
 
+# Determine the polarity based on the Sentiment Intensity
 def polarity(neg, neu, pos):
     maxi = max(neg, neu, pos)
     if maxi == neg:
@@ -120,6 +131,7 @@ def polarity(neg, neu, pos):
         return 1
 
 # 0
+# Unigram Model
 def unigramSentiment(data):
     processedData = preprocessData(data)
 
@@ -143,6 +155,7 @@ def unigramSentiment(data):
     return sum(aggregateSentiment) / len(aggregateSentiment)
 
 # 1
+# Bigram Model
 def bigramSentiment(data):
     processedData = preprocessData(data)
 
@@ -170,6 +183,7 @@ def bigramSentiment(data):
     return sum(aggregateSentiment) / len(aggregateSentiment)
 
 # 2
+# NLTK SIA model
 def preTrainedSentiment(data):
     processedData = preprocessData(data)
 
@@ -181,6 +195,7 @@ def preTrainedSentiment(data):
 
     return sum(aggregateSentiment) / len(aggregateSentiment)
 
+# Attempt to find a full company name based on a ticker symbol
 def getCompanyFromTicker(ticker):
     company = ''
     try:
@@ -189,6 +204,7 @@ def getCompanyFromTicker(ticker):
     except:
         return ''
 
+# Retrieve data from the twitter api 
 def gatherData(searchTerm):
     # Connection to twitter API
     bearer_token = auth()
@@ -219,7 +235,7 @@ def gatherData(searchTerm):
 
     return data
 
-
+# Base function
 def runAnalysis(method, searchTerm):
     data = gatherData(searchTerm)
     if method == 0: return unigramSentiment(data)
